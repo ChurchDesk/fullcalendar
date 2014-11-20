@@ -3,10 +3,11 @@ function ResourceManager(options) {
   // exports
   t.fetchResources = fetchResources;
   t.setResources = setResources;
+  t.filterResources = filterResources;
   t.mutateResourceEvent = mutateResourceEvent;
   // locals
   var resourceSources = [];
-  var cache;
+  var cache = {};
   // initialize the resources.
   setResources(options.resources);
   // add the resource sources
@@ -20,15 +21,15 @@ function ResourceManager(options) {
         resources: sources
       };
       resourceSources.push(resource);
-      cache = undefined;
+      cache.resources = undefined;
     } else if (typeof sources == 'string') {
       // is it a URL string?
       resource = {
         url: sources
       };
       resourceSources.push(resource);
-      cache = undefined;
-    } else if (typeof sources == 'object' && sources != null) {
+      cache.resources = undefined;
+    } else if (typeof sources == 'object' && sources !== null) {
       // is it json object?
       for (var i = 0; i < sources.length; i++) {
         var s = sources[i];
@@ -38,7 +39,7 @@ function ResourceManager(options) {
         };
         resourceSources.push(resource);
       }
-      cache = undefined;
+      cache.resources = undefined;
     }
   }
   /**
@@ -50,21 +51,33 @@ function ResourceManager(options) {
   function fetchResources(useCache, currentView) {
     // if useCache is not defined, default to true
     useCache = (typeof useCache !== 'undefined' ? useCache : true);
-    if (!useCache || cache === undefined) {
+    if (!useCache || cache.resources === undefined) {
       // do a fetch resource from source, rebuild cache
-      cache = [];
+      cache.resources = [];
       var len = resourceSources.length;
       for (var i = 0; i < len; i++) {
         var resources = fetchResourceSource(resourceSources[i], currentView);
-        cache = cache.concat(resources);
+        cache.resources = cache.resources.concat(resources);
       }
+      filterResources(false);
     }
+    return cache.filteredResources;
+  }
 
-    if($.isFunction(options.resourceFilter)) {
-      return $.grep(cache, options.resourceFilter);
-    }
+  /**
+   * ----------------------------------------------------------------
+   * Re-render the calendar using the resource filter.
+   * ----------------------------------------------------------------
+   */
 
-    return cache;
+  function filterResources(rerender) {
+    cache.filteredResources = $.isFunction(options.resourceFilter) ?
+                              $.grep(cache.resources, options.resourceFilter) :
+                              cache.resources;
+
+    // Re-render the calendar
+    if (rerender !== false) t.render(true);
+    return cache.filteredResources;
   }
 
   /**

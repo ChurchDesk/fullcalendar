@@ -44,7 +44,7 @@
       var element = $('#calendar');
 
       $('input:checkbox').change(function(){
-        element.fullCalendar('render', true);
+        element.fullCalendar('filterResources');
       });
 
       var date = new Date();
