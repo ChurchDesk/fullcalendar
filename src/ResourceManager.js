@@ -59,8 +59,9 @@ function ResourceManager(options) {
         var resources = fetchResourceSource(resourceSources[i], currentView);
         cache.resources = cache.resources.concat(resources);
       }
+      filterResources(false);
     }
-    return cache.resources;
+    return cache.filteredResources;
   }
 
   /**
@@ -69,20 +70,14 @@ function ResourceManager(options) {
    * ----------------------------------------------------------------
    */
 
-  function filterResources() {
-    var filtered = [];
-    // Backup all of the resources
-    cache.resourceBackup = cache.resources;
-    if ($.isFunction(options.resourceFilter)) {
-      // Filter them and set the previous resources variable
-      filtered = $.grep(cache.resources, options.resourceFilter);
-      cache.resources = filtered;
-    }
+  function filterResources(rerender) {
+    cache.filteredResources = $.isFunction(options.resourceFilter) ?
+                              $.grep(cache.resources, options.resourceFilter) :
+                              cache.resources;
+
     // Re-render the calendar
-    t.render(true);
-    // Restore the previous resources value
-    cache.resources = cache.resourceBackup;
-    return filtered;
+    if (rerender !== false) t.render(true);
+    return cache.filteredResources;
   }
 
   /**
