@@ -64,6 +64,9 @@ function ResourceManager(options) {
     if($.isFunction(options.resourceFilter)) {
       resources = $.grep(cache, options.resourceFilter);
     }
+    else {
+      resources = cache;
+    }
 
 
     if($.isFunction(options.resourceSort)) {
