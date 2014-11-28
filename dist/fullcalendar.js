@@ -2428,13 +2428,15 @@ function ResourceManager(options) {
       cache = [];
       var len = resourceSources.length;
       for (var i = 0; i < len; i++) {
-        var resources = fetchResourceSource(resourceSources[i], currentView);
-        cache = cache.concat(resources);
+        cache = cache.concat(fetchResourceSource(resourceSources[i], currentView));
       }
     }
 
     if($.isFunction(options.resourceFilter)) {
       resources = $.grep(cache, options.resourceFilter);
+    }
+    else {
+      resources = cache;
     }
 
 
