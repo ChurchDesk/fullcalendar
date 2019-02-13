@@ -857,6 +857,13 @@ function Calendar(element, instanceOptions) {
 		if (elementVisible()) {
 			freezeContentHeight();
 			currentView.destroyEvents(); // no performance cost if never rendered
+
+      /**
+       * Convert View's start and end dates into local time
+       */
+      var currentViewStart = currentView.start.clone().local();
+      var currentViewEnd = currentView.end.clone().local();
+
 			currentView.renderEvents($.grep(events, function(event) {
 			var end = event.end;
 
@@ -864,7 +871,7 @@ function Calendar(element, instanceOptions) {
 				end = currentView.calendar.getEventEnd(event);
 			}
 
-				return end > currentView.start && event.start < currentView.end;
+				return end > currentViewStart && currentViewEnd;
 			}));
 			unfreezeContentHeight();
 		}
@@ -3174,7 +3181,7 @@ function makeMoment(args, parseAsUTC, parseZone) {
 				mom._ambigZone = true;
 			}
 			else if (isSingleString) {
-				mom.zone(input); // if not a valid zone, will assign UTC
+				mom.utcOffset(input); // if not a valid zone, will assign UTC
 			}
 		}
 	}
